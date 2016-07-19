@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- <script src="pokemon.js"> </script> -->
+<script src="http://uaf-6.t2.ucsd.edu/~sicheng/dump/pgo/pokemon.js"> </script>
+<script src="http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/pokemon.js"> </script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPiQcAKq_WjVnZaFHHxRSZR_C8gMkaVWI"> </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript">
+var markers = [];
+
+style = [  {  featureType:"all", elementType:"all", stylers:[  {  visibility:"on" }, {  hue:"#131c1c" }, {  saturation:"-50" }, {  invert_lightness:!0 } ] }, {  featureType:"water", elementType:"all", stylers:[  {  visibility:"on" }, {  hue:"#005eff" }, {  invert_lightness:!0 } ] }, {  featureType:"poi", stylers:[  {  visibility:"off" } ] }, {  featureType:"transit", elementType:"all", stylers:[  {  visibility:"off" } ] } ];
+
+$(function() {
+    var mins_since_refresh_1 = Math.floor((Math.round(new Date().getTime()/1000) - last_updated_ts_1)/60);
+    var mins_since_refresh_2 = Math.floor((Math.round(new Date().getTime()/1000) - last_updated_ts_2)/60);
+    $("#lastUpdated").html( "<b>Last updated [1]: " + last_updated_1 + " (" + mins_since_refresh_1 + " minutes since you refreshed)</b><br>" +
+                            "<b>Last updated [2]: " + last_updated_2 + " (" + mins_since_refresh_2 + " minutes since you refreshed)</b>");
+
+});
+
+function initialize() {
+    var thisstyle = style;
+    var d = new Date();
+    var n = d.getHours();
+    console.log(n);
+    // if (n < 20 && n > 5) thisstyle = null;
+    if (true) thisstyle = null;
+
+    var mapOptions = {
+        zoom: 15,
+        center: new google.maps.LatLng(34.412, -119.86),
+        styles: thisstyle,
+        scrollWheelZoom:'center',
+    }
+
+    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+    var allpokemon = POKEMON_1.concat(POKEMON_2); 
+
+    var latitudes = [];
+
+    var infowindows = [];
+    var markers = [];
+
+
+    /*
+    var browserSupportFlag = false;
+    var initialLocation;
+    if(navigator.geolocation) {
+        browserSupportFlag = true;
+        navigator.geolocation.getCurrentPosition(function(position) {
+            initialLocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+            // map.setCenter(initialLocation);
+            console.log(initialLocation);
+        }, function() {
+            // handleNoGeolocation(browserSupportFlag);
+        });
+    }
+    */
+
+
+
+
+    for(var i = 0; i < allpokemon.length; i++) {
+
+        var image = {
+            url: 'http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/images/' + allpokemon[i].name + '.png',
+            anchor: new google.maps.Point(30, 30)
+        };
+
+        infowindows.push( new google.maps.InfoWindow({
+            content: "this is a test!",
+        }) );
+
+
+        var now = Math.round(new Date().getTime()/1000);
+        var time_left_then = allpokemon[i].life;
+        var then = allpokemon[i].ts;
+        var mins_left_now = Math.max(Math.floor((time_left_then - (now-then))/60),0);
+
+        if(mins_left_now <= 0) continue; // FIXME
+        // console.log(mins_left_now);
+
+        var label = '0123456789ABCDEF'[mins_left_now % 16];
+        
+
+        // skip loop if we've already drawn this pokemon
+        if(latitudes.indexOf(allpokemon[i].lat) > -1) continue;
+        latitudes.push(allpokemon[i].lat);
+
+        var pokePos = new google.maps.LatLng(allpokemon[i].lat/1E6, allpokemon[i].lng/1E6);
+        console.log(allpokemon[i]);
+        var marker = new google.maps.Marker({
+            position: pokePos,
+            map: map,
+            icon: image,
+            title: allpokemon[i].name,
+            label: {
+                text: label,
+                color: 'white',
+            },
+            number: i,
+            // special stuff for pokemon
+            name: allpokemon[i].name,
+            life: mins_left_now,
+        });
+
+        google.maps.event.addListener(marker, 'mouseover', function () {
+            // infowindows[i].open(map, this);
+            console.log(this);
+            $("#infoDiv").html("<b>" + this.name + "</b>: " + this.life + " minutes left");
+        });
+        google.maps.event.addListener(marker, 'mouseout', function () {
+        });
+
+        markers.push(marker);
+
+    }
+
+}
+
+
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+</head>
+<body>
+<center>
+<div id="lastUpdated"></div> <br>
+<div id="map-canvas" style="height:500px;width:1000px;"></div> <br>
+<div id="infoDiv"></div>
+</center>
+</body>
+</html>
