@@ -14,8 +14,12 @@ style = [  {  featureType:"all", elementType:"all", stylers:[  {  visibility:"on
 $(function() {
     var mins_since_refresh_1 = Math.floor((Math.round(new Date().getTime()/1000) - last_updated_ts_1)/60);
     var mins_since_refresh_2 = Math.floor((Math.round(new Date().getTime()/1000) - last_updated_ts_2)/60);
-    $("#lastUpdated").html( "<b>Last updated [1]: " + last_updated_1 + " (" + mins_since_refresh_1 + " minutes since you refreshed)</b><br>" +
-                            "<b>Last updated [2]: " + last_updated_2 + " (" + mins_since_refresh_2 + " minutes since you refreshed)</b>");
+    var extra_1 = "";
+    var extra_2 = "";
+    if(POKEMON_1.length == 0) extra_1 = " <font color='red'>[No pokemon -- server down?]</font>";
+    if(POKEMON_2.length == 0) extra_2 = " <font color='red'>[No pokemon -- server down?]</font>";
+    $("#lastUpdated").html( "<b>Last updated [1]: " + last_updated_1 + " (" + mins_since_refresh_1 + " minutes since you refreshed)" + extra_1 + "</b><br>" +
+                            "<b>Last updated [2]: " + last_updated_2 + " (" + mins_since_refresh_2 + " minutes since you refreshed)" + extra_2 + "</b>");
 
 });
 
