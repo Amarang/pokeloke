@@ -2,6 +2,7 @@ import api.pokelocator_api as api
 import datetime
 import time
 import os
+import sys
 import traceback
 from config import *
 
@@ -19,6 +20,8 @@ from config import *
 # is_nick = False
 # ###
 
+hour = datetime.datetime.now().hour + 1.0*datetime.datetime.now().minute/60
+
 def mail(s,b,to):
     with open("temp.txt", "w") as fhtemp:
         fhtemp.write(b)
@@ -26,24 +29,40 @@ def mail(s,b,to):
 
 pokelocs = []
 
-coords = [
-    (34.413946, -119.8448427),  # BROIDA
-    (34.4137253, -119.851935),  # THUNDERDOME
-    (34.416255, -119.845971),   # Campbell
-    (34.4147015, -119.841241),  # KITP
-    # (34.4121409, -119.8445374), # BREN
-    # (34.4126464, -119.8422689), # MARINE SCIENCE BLDG
-    # (34.4131220, -119.855372),  # Isla Vista
-    # (34.4097480, -119.858685),  # Del Playa
-    # (34.4149920, -119.862408),  # Childern's Park
-    # (34.4132827, -119.8581308), # BLAZE
-    # (34.4167965, -119.8566609), # TROPICANA DEL NORTE
-    # (34.4179524, -119.8547982), # SAN CLEM
-    # (34.4150936, -119.855745),  # IV St. Mark's
-    # (34.4137792, -119.8541089), # IV Kappa Kappa Gamma
-]
-
 print "TIME: ", datetime.datetime.now()
+
+coords = []
+if 7 < hour < 18:
+    coords = [
+        (34.413946, -119.8448427),  # BROIDA
+        (34.4137253, -119.851935),  # THUNDERDOME
+        (34.416255, -119.845971),   # Campbell
+        (34.4147015, -119.841241),  # KITP
+        (34.4121409, -119.8445374), # BREN
+        (34.4126464, -119.8422689), # MARINE SCIENCE BLDG
+        ]
+elif (hour < 1 or 18 < hour):
+    if is_nick:
+        coords = [
+            (34.4179524, -119.8547982), # San Clem
+            (34.4150936, -119.855745),  # IV St. Mark's
+            (34.4137792, -119.8541089), # IV Kappa Kappa Gamma
+            (34.4132827, -119.8581308), # IV Blaze
+            (34.4102330, -119.854927),  # IV Studio Plaza
+            (34.4102500, -119.865666),  # IV DP Sea Lookout Park
+        ]
+    else:
+        coords = [
+            (34.4131220, -119.855372),  # IV Pardall
+            (34.4167965, -119.8566609), # IV Tropicana Del Norte
+            (34.4097480, -119.858685),  # IV Del Playa
+            (34.4149920, -119.862408),  # IV Children's Park
+            (34.4102330, -119.854927),  # IV Tiki House
+        ]
+else:
+    print "Sleep time!"
+    sys.exit()
+
 for lat,lng in coords:
     try:
         pokelocs.extend( api.main(lat=lat, lng=lng, creds=creds) )
