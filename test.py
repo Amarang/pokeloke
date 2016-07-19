@@ -2,6 +2,7 @@ import api.pokelocator_api as api
 import datetime
 import time
 import os
+import traceback
 from config import *
 
 # ### CONFIG LOOKS LIKE
@@ -29,9 +30,9 @@ coords = [
     (34.413946, -119.8448427), # BROIDA
     (34.4137253, -119.851935), # THUNDERDOME
     (34.416255,  -119.845971), # Campbell
-    (34.414743, -119.8421682), # KITP
-    # (34.4121409,-119.8445374), # BREN
-    # (34.4126464,-119.8422689), # MARINE SCIENCE BLDG
+    (34.4147015,-119.841241), # KITP
+    (34.4121409,-119.8445374), # BREN
+    (34.4126464,-119.8422689), # MARINE SCIENCE BLDG
     # (34.4131220, -119.855372), # Isla Vista
     # (34.4097480, -119.858685), # Del Playa
     # (34.4149920, -119.862408), # Childern's Park
@@ -51,9 +52,9 @@ unseen_nick = {2,3,5,6,8,9,15,31,34,36,38,40,45,49,62,65,68,71,73,75,76,78,80,83
 
 unseen_sicheng = {2,3,5,6,8,9,15,26,28,31,34,36,38,40,45,57,59,62,64,65,67,68,70,71,73,76,78,80,83,85,87,88,89,91,93,94,95,97,99,103,110,112,113,114,115,117,119,121,122,128,130,131,132,135,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151}
 
-unseen_seth={2,3,5,6,7,8,9,15,26,28,31,34,36,38,40,45,49,61,62,64,65,68,71,73,76,80,83,85,87,88,89,91,93,94,95,97,98,99,103,105,108,110,112,113,115,117,119,121,122,123,125,126,128,130,131,132,134,135,137,138,139,140,141,142,143,144,145,146,148,149,150,151}
+unseen_seth={2,3,5,6,7,8,9,15,26,28,31,34,36,38,40,45,49,61,62,64,65,68,71,73,76,80,83,85,87,88,89,91,93,94,95,97,98,99,103,105,108,110,112,113,115,117,119,121,122,123,125,126,128,130,131,132,134,135,137,138,139,140,141,142,143,144,145,146,148,149,150,151}-{98, 126, 113, 125, 57, 26, 30, 33, 75, 119}
 
-mail_history = {}
+mail_history = set()
 suffix = "_1" if is_nick else "_2"
 with open("pokemon.js", "w") as fhout:
     fhout.write("last_updated%s = \"%s\";\n" % (suffix, datetime.datetime.now()))
@@ -75,23 +76,28 @@ with open("pokemon.js", "w") as fhout:
 
         # HANDLE UNSEEN
 
-        b = """
-        Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
-        Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
-        """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
-        s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
+        try:
+            b = """
+            Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
+            Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
+            """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
+            s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
 
-        if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
-            mail(s=s, b=b, to=nick_email)
-            mail_history.add( ("nick", str(lat)) )
+            if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
+                mail(s=s, b=b, to=nick_email)
+                mail_history.add( ("nick", str(lat)) )
 
-        if num in unseen_seth and minsleft >= 3 and ("seth", str(lat)) not in mail_history:
-            mail(s=s, b=b, to=seth_email)
-            mail_history.add( ("seth", str(lat)) )
+            if num in unseen_seth and minsleft >= 3 and ("seth", str(lat)) not in mail_history:
+                mail(s=s, b=b, to=seth_email)
+                mail_history.add( ("seth", str(lat)) )
 
-        if num in unseen_sicheng and minsleft >= 3 and ("sicheng", str(lat)) not in mail_history:
-            mail(s=s, b=b, to=sicheng_email)
-            mail_history.add( ("sicheng", str(lat)) )
+            if num in unseen_sicheng and minsleft >= 3 and ("sicheng", str(lat)) not in mail_history:
+                mail(s=s, b=b, to=sicheng_email)
+                mail_history.add( ("sicheng", str(lat)) )
+        except Exception, err:
+            print "Exception!"
+
+            traceback.print_exc()
 
 
     fhout.write("];\n" )
