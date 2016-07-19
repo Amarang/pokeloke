@@ -18,8 +18,6 @@ from config import *
 # is_nick = False
 # ###
 
-is_nick = False
-
 def mail(s,b,to):
     with open("temp.txt", "w") as fhtemp:
         fhtemp.write(b)
