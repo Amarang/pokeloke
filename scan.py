@@ -18,7 +18,7 @@ from config import *
 # seth_email = ...
 # sicheng_email = ...
 # is_nick = False
-# ###
+# ### 
 
 hour = datetime.datetime.now().hour + 1.0*datetime.datetime.now().minute/60
 
