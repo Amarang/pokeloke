@@ -109,7 +109,7 @@ with open("pokemon.js", "w") as fhout:
             skipping = False
             for blah in screening_list:
                 if name == blah:
-                    print "Pokemon ", name, " found, but not bother showing it."
+                    print name, "is found, but not bother showing it on the map."
                     skipping = True
             if skipping:
                 continue
