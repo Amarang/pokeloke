@@ -31,21 +31,21 @@ pokelocs = []
 
 print "TIME: ", datetime.datetime.now()
 
-scan_iv_1 = false
-scan_iv_2 = false
-scan_broida = false
+scan_iv_1 = False
+scan_iv_2 = False
+scan_broida = False
 
 if 7 < hour < 18:
-    scan_broida = true
+    scan_broida = True
 elif (hour < 1 or 18 < hour):
     if is_nick:
-        scan_iv_1 = true
+        scan_iv_1 = True
     else:
-        scan_iv_2 = true
+        scan_iv_2 = True
 
-# scan_iv_1   = true
-# scan_iv_2   = true
-# scan_broida = true
+# scan_iv_1   = True
+# scan_iv_2   = True
+# scan_broida = True
 
 coords = []
 if scan_broida:
