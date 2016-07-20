@@ -87,6 +87,9 @@ unseen_sicheng = {2,3,5,6,8,9,15,28,31,34,36,38,40,45,62,65,67,68,70,71,73,76,78
 
 unseen_seth = {2,3,5,6,7,8,9,15,26,28,31,34,36,38,40,45,49,61,62,64,65,68,71,73,76,80,83,85,87,88,89,91,93,94,95,98,99,103,105,108,110,112,113,115,117,119,121,122,123,125,126,128,130,131,132,134,135,137,138,139,140,141,142,143,144,145,146,148,149,150,151}-{98, 126, 113, 125, 57, 26, 30, 33, 75, 119, 7, 143}
 
+apply_screening = True
+screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle"}
+
 mail_history = set()
 suffix = "_1" if is_nick else "_2"
 with open("pokemon.js", "w") as fhout:
@@ -102,13 +105,19 @@ with open("pokemon.js", "w") as fhout:
         num = int(num)
         life = float(life)
         ts = int(ts)
+        if apply_screening:
+            skipping = False
+            for blah in screening_list:
+                if name == blah:
+                    print "Pokemon ", name, " found, but not bother showing it."
+                    skipping = True
+            if skipping:
+                continue
         fhout.write("{ name:\"%s\", lat:%i, lng:%i, num:%i, life:%i, ts:%i },\n" % (name, lat_goog, lng_goog, num, life, ts))
 
         minsleft = int(life/60)
 
-
         # HANDLE UNSEEN
-
         try:
             b = """
             Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
@@ -131,7 +140,6 @@ with open("pokemon.js", "w") as fhout:
             print "Exception!"
 
             traceback.print_exc()
-
 
     fhout.write("];\n" )
 
