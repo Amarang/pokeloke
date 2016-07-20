@@ -17,7 +17,7 @@ from config import *
 # nick_email = ...
 # seth_email = ...
 # sicheng_email = ...
-# is_nick = False
+# who = "nick" # or "sicheng" or "seth"
 # ### 
 
 hour = datetime.datetime.now().hour + 1.0*datetime.datetime.now().minute/60
@@ -38,7 +38,7 @@ scan_broida = False # Can turn on if we are at the office still
 if 7 < hour < 18:
     scan_broida = True
 elif (hour < 1 or 18 < hour):
-    if is_nick:
+    if who == "nick":
         scan_iv_1 = True
     else:
         scan_iv_2 = True
@@ -81,7 +81,7 @@ for lat,lng in coords:
         print "SERVER ERROR, so skipping this location"
 
 
-unseen_nick = {2,3,5,6,8,9,15,31,34,36,38,40,45,49,62,65,68,71,73,75,76,78,80,83,85,87,88,89,91,93,94,95,103,110,112,114,115,117,119,122,123,128,130,131,132,137,138,139,140,142,143,144,145,146,147,148,149,150,151}
+unseen_nick = {2,3,5,6,8,9,15,31,34,36,38,40,45,49,62,65,68,71,73,75,76,78,80,83,85,87,88,89,91,93,94,95,103,110,112,114,115,117,119,122,123,128,130,131,132,137,138,139,140,142,143,144,145,146,147,148,149,150,151}-{97,95,117,49,140,103,78}
 
 unseen_sicheng = {2,3,5,6,8,9,15,28,31,34,36,40,45,62,65,68,70,71,76,83,85,87,88,89,91,94,99,110,113,114,115,119,121,122,130,131,132,134,135,136,139,141,142,143,144,145,146,147,148,149,150,151}
 
@@ -91,7 +91,7 @@ apply_screening = True
 screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle"}
 
 mail_history = set()
-suffix = "_1" if is_nick else "_2"
+suffix = "_1" if who == "nick" else "_2"
 with open("pokemon.js", "w") as fhout:
     fhout.write("last_updated%s = \"%s\";\n" % (suffix, datetime.datetime.now()))
     fhout.write("last_updated_ts%s = %i;\n" % (suffix, int(time.time())))
