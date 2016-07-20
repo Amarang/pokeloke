@@ -42,10 +42,13 @@ elif (hour < 1 or 18 < hour):
         scan_iv_1 = True
     else:
         scan_iv_2 = True
+else:
+    print "Sleep time!"
+    sys.exit()
 
 # scan_iv_1   = True
 # scan_iv_2   = True
-# scan_broida = True
+scan_broida = True # Can turn on if we are at the office still
 
 coords = []
 if scan_broida:
@@ -74,9 +77,6 @@ if scan_iv_2:
         (34.4149920, -119.862408),  # IV Children's Park
         (34.4102330, -119.854927),  # IV Tiki House
     ]
-else:
-    print "Sleep time!"
-    sys.exit()
 
 for lat,lng in coords:
     try:
