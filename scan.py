@@ -49,7 +49,7 @@ elif (hour < 1 or 18 < hour):
 
 coords = []
 if scan_broida:
-    coords = [
+    coords += [
         (34.413946, -119.8448427),  # BROIDA
         (34.4137253, -119.851935),  # THUNDERDOME
         (34.416255, -119.845971),   # Campbell
@@ -57,8 +57,8 @@ if scan_broida:
         (34.4121409, -119.8445374), # BREN
         (34.4126464, -119.8422689), # MARINE SCIENCE BLDG
         ]
-elif scan_iv_1:
-    coords = [
+if scan_iv_1:
+    coords += [
         (34.4179524, -119.8547982), # San Clem
         (34.4150936, -119.855745),  # IV St. Mark's
         (34.4137792, -119.8541089), # IV Kappa Kappa Gamma
@@ -66,8 +66,8 @@ elif scan_iv_1:
         (34.4102330, -119.854927),  # IV Studio Plaza
         (34.4102500, -119.865666),  # IV DP Sea Lookout Park
     ]
-elif scan_iv_2:
-    coords = [
+if scan_iv_2:
+    coords += [
         (34.4131220, -119.855372),  # IV Pardall
         (34.4167965, -119.8566609), # IV Tropicana Del Norte
         (34.4097480, -119.858685),  # IV Del Playa
