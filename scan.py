@@ -33,7 +33,7 @@ print "TIME: ", datetime.datetime.now()
 
 scan_iv_1 = False
 scan_iv_2 = False
-scan_broida = False
+scan_broida = False # Can turn on if we are at the office still
 
 if 7 < hour < 18:
     scan_broida = True
@@ -45,10 +45,6 @@ elif (hour < 1 or 18 < hour):
 else:
     print "Sleep time!"
     sys.exit()
-
-# scan_iv_1   = True
-# scan_iv_2   = True
-scan_broida = True # Can turn on if we are at the office still
 
 coords = []
 if scan_broida:
