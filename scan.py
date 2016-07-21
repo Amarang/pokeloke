@@ -103,7 +103,7 @@ unseen_nick = {2,3,5,6,8,9,15,31,34,36,38,40,45,49,62,65,68,71,73,75,76,78,80,83
 
 unseen_sicheng = {2,3,5,6,8,9,15,28,31,34,36,40,45,62,65,68,70,71,76,83,85,87,88,89,91,94,99,110,113,114,115,119,121,122,130,131,132,134,135,136,139,141,142,143,144,145,146,147,148,149,150,151}
 
-unseen_seth = {2,3,5,6,7,8,9,15,26,28,31,34,36,38,40,45,49,61,62,64,65,68,71,73,76,80,83,85,87,88,89,91,93,94,95,98,99,103,105,108,110,112,113,115,117,119,121,122,123,125,126,128,130,131,132,134,135,137,138,139,140,141,142,143,144,145,146,148,149,150,151}-{98, 126, 113, 125, 57, 26, 30, 33, 75, 119, 7, 143}
+unseen_seth = {2,3,5,6,8,9,28,31,34,36,38,40,45,62,64,65,68,71,73,76,83,85,87,88,89,91,93,94,103,105,108,110,112,115,117,122,123,130,131,132,137,138,139,141,142,144,145,146,147,148,149,150,151}
 
 apply_screening = True
 screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth"}
@@ -154,7 +154,7 @@ with open("pokemon.js", "w") as fhout:
 
             if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
                 extra = ""
-                if is_walkable((lat,lng),hour,minsleft): extra = "[walk] "
+                if is_walkable((float(lat),float(lng)),hour,minsleft): extra = "[walk] "
                 s = "[PGo] {extra}{name} - {life} mins left".format(extra=extra, name=name, life=minsleft)
                 mail(s=s, b=b, to=nick_email)
                 mail_history.add( ("nick", str(lat)) )
