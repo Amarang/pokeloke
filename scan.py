@@ -3,6 +3,7 @@ import datetime
 import time
 import os
 import sys
+import math
 import traceback
 from config import *
 
@@ -26,6 +27,23 @@ def mail(s,b,to):
     with open("temp.txt", "w") as fhtemp:
         fhtemp.write(b)
     os.system("cat temp.txt | mail -s \"%s\" %s" % (s, to))
+
+def distance(p1, p2):
+    lat1, long1 = p1
+    lat2, long2 = p2
+    radiusEarth = 3956.547 # miles
+    milesPerDegLat = math.pi*radiusEarth/180.0
+    milesPerDegLong = 2.0*math.pi*radiusEarth*math.cos(lat1*math.pi/180.0)/360.0
+    dx = abs(long2-long1)*milesPerDegLong
+    dy = abs(lat2-lat1)*milesPerDegLat
+    return math.sqrt(dx**2 + dy**2)
+
+def where_is_nick(hour):
+    if 9 < hour < 18: return 34.4140608,-119.8429348 # broida
+    else: return 34.4181543,-119.8549256 # san clem
+
+def is_walkable(p1,hour,lifetime_mins):
+    return lifetime_mins - 1 >= distance(where_is_nick(hour), p1) / (3.9) * 60.0
 
 pokelocs = []
 
@@ -81,14 +99,14 @@ for lat,lng in coords:
         print "SERVER ERROR, so skipping this location"
 
 
-unseen_nick = {2,3,5,6,8,9,15,31,34,36,38,40,45,49,62,65,68,71,73,75,76,78,80,83,85,87,88,89,91,93,94,95,103,110,112,114,115,117,119,122,123,128,130,131,132,137,138,139,140,142,143,144,145,146,147,148,149,150,151}-{97,95,117,49,140,103,78}
+unseen_nick = {2,3,5,6,8,9,15,31,34,36,38,40,45,49,62,65,68,71,73,75,76,78,80,83,85,87,88,89,91,93,94,95,103,110,112,114,115,117,119,122,123,128,130,131,132,137,138,139,140,142,143,144,145,146,147,148,149,150,151}-{97,95,117,49,140,103,78,80,119}
 
 unseen_sicheng = {2,3,5,6,8,9,15,28,31,34,36,40,45,62,65,68,70,71,76,83,85,87,88,89,91,94,99,110,113,114,115,119,121,122,130,131,132,134,135,136,139,141,142,143,144,145,146,147,148,149,150,151}
 
 unseen_seth = {2,3,5,6,7,8,9,15,26,28,31,34,36,38,40,45,49,61,62,64,65,68,71,73,76,80,83,85,87,88,89,91,93,94,95,98,99,103,105,108,110,112,113,115,117,119,121,122,123,125,126,128,130,131,132,134,135,137,138,139,140,141,142,143,144,145,146,148,149,150,151}-{98, 126, 113, 125, 57, 26, 30, 33, 75, 119, 7, 143}
 
 apply_screening = True
-screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans"}
+screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth"}
 
 mail_history = set()
 suffix = "_1" if who == "nick" else "_2"
@@ -119,11 +137,14 @@ with open("pokemon.js", "w") as fhout:
 
         # HANDLE UNSEEN
         try:
+            extra = ""
+            if who == "nick" and is_walkable((lat,lng),hour,minsleft): extra = "[walk] "
+
             b = """
             Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
             Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
             """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
-            s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
+            s = "[PGo] {extra}{name} - {life} mins left".format(extra=extra, name=name, life=minsleft)
 
             if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
                 mail(s=s, b=b, to=nick_email)
