@@ -137,18 +137,12 @@ with open("pokemon.js", "w") as fhout:
 
         # HANDLE UNSEEN
         try:
-            extra = ""
-            if who == "nick" and is_walkable((lat,lng),hour,minsleft): extra = "[walk] "
 
             b = """
             Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
             Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
             """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
-            s = "[PGo] {extra}{name} - {life} mins left".format(extra=extra, name=name, life=minsleft)
-
-            if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
-                mail(s=s, b=b, to=nick_email)
-                mail_history.add( ("nick", str(lat)) )
+            s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
 
             if num in unseen_seth and minsleft >= 3 and ("seth", str(lat)) not in mail_history:
                 mail(s=s, b=b, to=seth_email)
@@ -157,6 +151,14 @@ with open("pokemon.js", "w") as fhout:
             if num in unseen_sicheng and minsleft >= 3 and ("sicheng", str(lat)) not in mail_history:
                 mail(s=s, b=b, to=sicheng_email)
                 mail_history.add( ("sicheng", str(lat)) )
+
+            if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
+                extra = ""
+                if is_walkable((lat,lng),hour,minsleft): extra = "[walk] "
+                s = "[PGo] {extra}{name} - {life} mins left".format(extra=extra, name=name, life=minsleft)
+                mail(s=s, b=b, to=nick_email)
+                mail_history.add( ("nick", str(lat)) )
+
         except Exception, err:
             print "Exception!"
 
