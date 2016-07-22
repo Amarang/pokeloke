@@ -5,6 +5,7 @@ import os
 import sys
 import math
 import traceback
+import requests
 from config import *
 
 # ### CONFIG LOOKS LIKE
@@ -99,6 +100,12 @@ for lat,lng in coords:
         pokelocs.extend( api.main(lat=lat, lng=lng, creds=creds) )
     except:
         print "SERVER ERROR, so skipping this location"
+
+# STEAL MORE POKEMON FROM skiplagged.com/api/pokemon.php!!!
+slag_json = requests.get("https://skiplagged.com/api/pokemon.php?bounds=34.407904,-119.864899,34.41911,-119.828807").json()
+for poke in slag_json["pokemons"]:
+    pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), poke["pokemon_id"], poke["pokemon_name"].replace(" ",""), str(poke["latitude"]), str(poke["longitude"]), poke["expires"]-int(time.time()))
+    pokelocs.append(pokeloc)
 
 
 unseen_nick = {2,3,5,6,8,9,15,31,34,36,38,40,45,49,62,65,68,71,73,75,76,78,80,83,85,87,88,89,91,93,94,95,103,110,112,114,115,117,119,122,123,128,130,131,132,137,138,139,140,142,143,144,145,146,147,148,149,150,151}-{97,95,117,49,140,103,78,80,119}
