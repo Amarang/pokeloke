@@ -410,8 +410,8 @@ def main(location=None, lat=None, lng=None, creds={}):
 
     origin = LatLng.from_degrees(FLOAT_LAT, FLOAT_LONG)
     # while True:
-    # for i in range(3):
-    # for i in range(2):
+    # for i in range(3): 
+    # for i in range(2): # FIXME
     for i in range(1):
         original_lat = FLOAT_LAT
         original_long = FLOAT_LONG

@@ -18,6 +18,7 @@ from config import *
 # nick_email = ...
 # seth_email = ...
 # sicheng_email = ...
+# gabriel_email = ...
 # who = "nick" # or "sicheng" or "seth"
 # ### 
 
@@ -55,7 +56,8 @@ scan_broida = False # Can turn on if we are at the office still
 
 if 7 < hour < 18:
     scan_broida = True
-elif (hour < 1 or 18 < hour):
+# elif (hour < 1 or 18 < hour):
+elif (hour <= 7 or 18 < hour): # FIXME
     if who == "nick":
         scan_iv_1 = True
     else:
@@ -105,6 +107,8 @@ unseen_sicheng = {2,3,5,6,8,9,15,28,31,34,36,40,45,62,65,68,70,71,76,83,85,87,88
 
 unseen_seth = {2,3,5,6,8,9,28,31,34,36,38,40,45,62,64,65,68,71,73,76,83,85,87,88,89,91,93,94,103,105,108,110,112,115,117,122,123,130,131,132,137,138,139,141,142,144,145,146,147,148,149,150,151}
 
+unseen_gabriel = {2,3,5,6,8,9,28,31,34,36,38,40,45,62,64,65,68,71,73,76,83,85,87,88,89,91,93,94,103,105,108,110,112,115,117,122,123,130,131,132,137,138,139,141,142,144,145,146,147,148,149,150,151}
+
 apply_screening = True
 screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth"}
 
@@ -144,6 +148,10 @@ with open("pokemon.js", "w") as fhout:
             """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
             s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
 
+            if num in unseen_gabriel and minsleft >= 3 and ("gabriel", str(lat)) not in mail_history:
+                mail(s=s, b=b, to=gabriel_email)
+                mail_history.add( ("gabriel", str(lat)) )
+                
             if num in unseen_seth and minsleft >= 3 and ("seth", str(lat)) not in mail_history:
                 mail(s=s, b=b, to=seth_email)
                 mail_history.add( ("seth", str(lat)) )
