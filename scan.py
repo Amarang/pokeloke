@@ -126,7 +126,6 @@ with open("pokemon.js", "w") as fhout:
     fhout.write("last_updated_ts%s = %i;\n" % (suffix, int(time.time())))
     fhout.write("POKEMON%s = [\n" % suffix)
     for pokeloc in pokelocs:
-        print pokeloc
         ts,num,name,lat,lng,life = pokeloc.split(",")
         name = name.replace(" ","")
         lat_goog = int(float(lat)*1e6)
@@ -134,6 +133,13 @@ with open("pokemon.js", "w") as fhout:
         num = int(num)
         life = float(life)
         ts = int(ts)
+
+        # skip entirely if the pokemon is more than 20 miles away
+        if distance(where_is_nick(hour), p1) > 20.0: continue
+
+        # needed for log file
+        print pokeloc
+        
         if apply_screening:
             skipping = False
             for blah in screening_list:
