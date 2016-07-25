@@ -135,7 +135,7 @@ with open("pokemon.js", "w") as fhout:
         ts = int(ts)
 
         # skip entirely if the pokemon is more than 20 miles away
-        if distance(where_is_nick(hour), p1) > 20.0: continue
+        if distance(where_is_nick(hour), (float(lat),float(lng))) > 20.0: continue
 
         # needed for log file
         print pokeloc
