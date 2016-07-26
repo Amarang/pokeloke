@@ -108,11 +108,11 @@ for poke in slag_json["pokemons"]:
     pokelocs.append(pokeloc)
 
 
-unseen_nick = {128,130,131,132,5,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122}
+unseen_nick = {130,131,132,5,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122}
 
 unseen_sicheng = {2,3,5,6,8,9,15,28,31,36,40,45,62,65,68,71,76,83,85,87,89,91,94,110,113,114,115,121,122,130,131,132,134,135,136,139,141,142,143,144,145,146,147,148,149,150,151}
 
-unseen_seth = {2,3,5,6,8,9,28,31,34,36,38,40,45,62,64,65,68,71,73,76,83,85,87,88,89,91,93,94,103,105,108,110,112,115,117,122,123,130,131,132,137,138,139,141,142,144,145,146,147,148,149,150,151}
+unseen_seth = {2,3,6,8,9,31,34,36,40,45,62,65,68,71,76,83,87,88,89,91,94,103,105,110,115,122,130,131,132,137,138,139,142,144,145,146,148,149,150,151}
 
 unseen_gabriel = {2,3,5,6,8,9,28,31,34,36,38,40,45,62,64,65,68,71,73,76,83,85,87,88,89,91,93,94,103,105,108,110,112,115,117,122,123,130,131,132,137,138,139,141,142,144,145,146,147,148,149,150,151,114}
 
@@ -134,8 +134,8 @@ with open("pokemon.js", "w") as fhout:
         life = float(life)
         ts = int(ts)
 
-        # skip entirely if the pokemon is more than 20 miles away
-        if distance(where_is_nick(hour), (float(lat),float(lng))) > 20.0: continue
+        # skip entirely if the pokemon is more than 7 miles away
+        if distance(where_is_nick(hour), (float(lat),float(lng))) > 7.0: continue
 
         # needed for log file
         print pokeloc
@@ -174,9 +174,6 @@ with open("pokemon.js", "w") as fhout:
                 mail_history.add( ("sicheng", str(lat)) )
 
             if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
-                extra = ""
-                if is_walkable((float(lat),float(lng)),hour,minsleft): extra = "[walk] "
-                s = "[PGo] {extra}{name} - {life} mins left".format(extra=extra, name=name, life=minsleft)
                 mail(s=s, b=b, to=nick_email)
                 mail_history.add( ("nick", str(lat)) )
 
