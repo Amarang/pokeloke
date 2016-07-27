@@ -6,6 +6,7 @@ import sys
 import math
 import traceback
 import requests
+import pickle
 from config import *
 
 # ### CONFIG LOOKS LIKE
@@ -15,17 +16,39 @@ from config import *
 #         "GOOG_USERNAME": ...,
 #         "GOOG_PASSWORD": ...,
 # }
-
-# nick_email = ...
-# seth_email = ...
-# sicheng_email = ...
-# gabriel_email = ...
+# emails = {}
+# emails["nick"] = ...
+# emails["seth"] = ...
+# emails["sicheng"] = ...
+# emails["gabriel"] = ...
 # who = "nick" # or "sicheng" or "seth"
 # ### 
 
 hour = datetime.datetime.now().hour + 1.0*datetime.datetime.now().minute/60
 
+email_history = set()
+email_history_fname = "history.pkl"
+def have_emailed(unique_tuple):
+    global email_history
+    if not email_history and os.path.isfile(email_history_fname):
+        try:
+            with open(email_history_fname, "r") as fhist_in:
+                email_history = pickle.load(fhist_in)
+        except: pass
+    return unique_tuple in email_history
+def save_email_history():
+    with open(email_history_fname, "w") as fhist_out:
+        pickle.dump(email_history,fhist_out)
+def add_to_email_history(unique_tuple):
+    global email_history
+    email_history.add(unique_tuple)
+
+
+def get_unique_tuple(person, num, lat, lng, ts, life):
+    return (str(person), int(num), round(float(lat),5),round(float(lng),5),int(ts-(900-float(life)))/100)
+
 def mail(s,b,to):
+    print "mailing %s to %s" % (s, to)
     with open("temp.txt", "w") as fhtemp:
         fhtemp.write(b)
     os.system("cat temp.txt | mail -s \"%s\" %s" % (s, to))
@@ -95,6 +118,7 @@ if scan_iv_2:
         (34.4102330, -119.854927),  # IV Tiki House
     ]
 
+
 for lat,lng in coords:
     try:
         pokelocs.extend( api.main(lat=lat, lng=lng, creds=creds) )
@@ -108,18 +132,16 @@ for poke in slag_json["pokemons"]:
     pokelocs.append(pokeloc)
 
 
-unseen_nick = {130,131,132,5,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122}
 
-unseen_sicheng = {2,3,5,6,8,9,28,31,36,40,45,62,65,68,71,76,83,87,89,91,94,110,113,114,115,121,122,130,131,132,134,135,136,139,141,142,143,144,145,146,147,148,149,150,151}
-
-unseen_seth = {2,3,6,8,9,31,34,36,40,45,62,65,68,71,76,83,87,88,89,91,94,103,105,110,115,122,130,131,132,137,138,139,142,144,145,146,148,149,150,151}
-
-unseen_gabriel = {2,3,5,6,9,12,15,30,31,34,36,40,45,51,59,61,65,68,70,71,76,83,91,94,105,108,110,113,114,115,122,130,131,132,134,135,139,141,142,143,144,145,146,148,149,150,151}
+unseen = {}
+unseen["nick"] = {130,131,132,5,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122}
+unseen["sicheng"] = {2,3,5,6,8,9,28,31,36,40,45,62,65,68,71,76,83,87,89,91,94,110,113,114,115,121,122,130,131,132,134,135,136,139,141,142,143,144,145,146,147,148,149,150,151}
+unseen["seth"] = {2,3,6,8,9,31,34,36,40,45,62,65,68,71,76,83,87,88,89,91,94,103,105,110,115,122,130,131,132,137,138,139,142,144,145,146,148,149,150,151}
+unseen["gabriel"] = {2,3,5,6,9,12,15,30,31,34,36,40,45,51,59,61,65,68,70,71,76,83,91,94,105,108,110,113,114,115,122,130,131,132,134,135,139,141,142,143,144,145,146,148,149,150,151}
 
 apply_screening = True
 screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth"}
 
-mail_history = set()
 suffix = "_1" if who == "nick" else "_2"
 with open("pokemon.js", "w") as fhout:
     fhout.write("last_updated%s = \"%s\";\n" % (suffix, datetime.datetime.now()))
@@ -137,6 +159,9 @@ with open("pokemon.js", "w") as fhout:
         # skip entirely if the pokemon is more than 7 miles away
         if distance(where_is_nick(hour), (float(lat),float(lng))) > 7.0: continue
 
+        # or if the pokemon has an unphysical lifetime
+        if not (0 <= life <= 900): continue
+
         # needed for log file
         print pokeloc
         
@@ -153,35 +178,24 @@ with open("pokemon.js", "w") as fhout:
         minsleft = int(life/60)
 
         # HANDLE UNSEEN
-        try:
+        b = """
+        Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
+        Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
+        """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
+        s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
 
-            b = """
-            Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
-            Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
-            """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
-            s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
+        for person in unseen.keys():
+            if num not in unseen[person]: continue
+            if minsleft < 3: continue 
 
-            if num in unseen_gabriel and minsleft >= 3 and ("gabriel", str(lat)) not in mail_history:
-                mail(s=s, b=b, to=gabriel_email)
-                mail_history.add( ("gabriel", str(lat)) )
-                
-            if num in unseen_seth and minsleft >= 3 and ("seth", str(lat)) not in mail_history:
-                mail(s=s, b=b, to=seth_email)
-                mail_history.add( ("seth", str(lat)) )
+            unique_tuple =  get_unique_tuple(person, num, lat, lng, ts, life)
+            if have_emailed(unique_tuple): continue
 
-            if num in unseen_sicheng and minsleft >= 3 and ("sicheng", str(lat)) not in mail_history:
-                mail(s=s, b=b, to=sicheng_email)
-                mail_history.add( ("sicheng", str(lat)) )
-
-            if num in unseen_nick and minsleft > 3 and ("nick", str(lat)) not in mail_history:
-                mail(s=s, b=b, to=nick_email)
-                mail_history.add( ("nick", str(lat)) )
-
-        except Exception, err:
-            print "Exception!"
-
-            traceback.print_exc()
+            mail(s=s, b=b, to=emails[person])
+            add_to_email_history(unique_tuple)
 
     fhout.write("];\n" )
 
 os.system("scp pokemon.js uaf:~/public_html/dump/pgo/")
+
+save_email_history()
