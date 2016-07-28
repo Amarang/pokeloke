@@ -93,29 +93,28 @@ else:
 coords = []
 if scan_broida:
     coords += [
-        (34.413946, -119.8448427),  # BROIDA
-        (34.4137253, -119.851935),  # THUNDERDOME
-        (34.416255, -119.845971),   # Campbell
-        (34.4147015, -119.841241),  # KITP
-        (34.4121409, -119.8445374), # BREN
-        (34.4126464, -119.8422689), # MARINE SCIENCE BLDG
+            (34.41416,  -119.84296), # broida
+            (34.41230,  -119.84659), # south of broida
+            (34.41638,  -119.84642), # campbell
+            (34.40946,  -119.85603), # dp close to campus
+            (34.41225,  -119.85530), # freebirds
+            (34.41516,  -119.85521), # north embarcadero del norte
         ]
 if scan_iv_1:
     coords += [
-        (34.4179524, -119.8547982), # San Clem
-        (34.4150936, -119.855745),  # IV St. Mark's
-        (34.4137792, -119.8541089), # IV Kappa Kappa Gamma
-        (34.4132827, -119.8581308), # IV Blaze
-        (34.4102330, -119.854927),  # IV Studio Plaza
-        (34.4102500, -119.865666),  # IV DP Sea Lookout Park
+            (34.40946,  -119.85603), # dp close to campus
+            (34.41225,  -119.85530), # freebirds
+            (34.41024,  -119.86169),
+            (34.40985,  -119.86534),
+            (34.41257,  -119.85886),
     ]
 if scan_iv_2:
     coords += [
-        (34.4131220, -119.855372),  # IV Pardall
-        (34.4167965, -119.8566609), # IV Tropicana Del Norte
-        (34.4097480, -119.858685),  # IV Del Playa
-        (34.4149920, -119.862408),  # IV Children's Park
-        (34.4102330, -119.854927),  # IV Tiki House
+            (34.41516,  -119.85521), # north embarcadero del norte
+            (34.40981,  -119.85886),
+            (34.41526,  -119.86023),
+            (34.41250,  -119.86114),
+            (34.41282,  -119.86538),
     ]
 
 
@@ -131,6 +130,7 @@ for poke in slag_json["pokemons"]:
     pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), poke["pokemon_id"], poke["pokemon_name"].replace(" ",""), str(poke["latitude"]), str(poke["longitude"]), poke["expires"]-int(time.time()))
     pokelocs.append(pokeloc)
 
+# pokelocs.append("1469667707,149,Dragonite,34.4140987,-119.8432408,810")
 
 
 unseen = {}
