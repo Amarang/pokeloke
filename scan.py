@@ -90,8 +90,48 @@ def where_is_nick(hour):
 def is_walkable(p1,hour,lifetime_mins):
     return lifetime_mins - 1 >= distance(where_is_nick(hour), p1) / (3.9) * 60.0
 
-pokelocs = []
+def fetch_ours(coords):
+    print "### FETCHING OURS ###"
+    new_pokelocs = []
+    for lat,lng in coords:
+        try:
+            new_pokelocs.extend( api.main(lat=lat, lng=lng, creds=creds) )
+        except:
+            print "SERVER ERROR, so skipping this location"
+    return new_pokelocs
 
+def fetch_skiplagged():
+    print "### FETCHING SKIPLAGGED ###"
+    # STEAL MORE POKEMON FROM skiplagged.com/api/pokemon.php!!!
+    new_pokelocs = []
+    slag_json = requests.get("https://skiplagged.com/api/pokemon.php?bounds=34.407904,-119.864899,34.41911,-119.828807").json()
+    for poke in slag_json["pokemons"]:
+        pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), poke["pokemon_id"], poke["pokemon_name"].replace(" ",""), str(poke["latitude"]), str(poke["longitude"]), poke["expires"]-int(time.time()))
+        new_pokelocs.append(pokeloc)
+    return new_pokelocs
+
+def fetch_pokevision(lat,lng):
+    # STEAL MORE POKEMON FROM pokevision.com!!!
+    print "### FETCHING POKEVISION ###"
+    new_pokelocs = []
+    pvjob_json = get_json("https://pokevision.com/map/scan/%s/%s" % (str(lat),str(lng)))
+    if pvjob_json["status"] == "success":
+        jobId = pvjob_json["jobId"]
+        time.sleep(5)
+        pv_json = get_json("https://pokevision.com/map/data/%s/%s/%s" % (str(lat),str(lng),jobId))
+        if "pokemon" in pv_json:
+            for poke in pv_json["pokemon"]:
+                pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), int(poke["pokemonId"]), pokemon_id_to_name(int(poke["pokemonId"])), str(poke["latitude"]), str(poke["longitude"]), int(poke["expiration_time"])-int(time.time()))
+                new_pokelocs.append(pokeloc)
+        else:
+            print "### WARNING! ### Pokevision is taking it's sweet time to scan. Even after 5 seconds, we didn't get anything. Ignoring for this round."
+    else:
+        print "### WARNING! ### Pokevision is rate-limiting us right now"
+    return new_pokelocs
+
+
+
+pokelocs = []
 print "TIME: ", datetime.datetime.now()
 
 scan_iv_1 = False
@@ -117,53 +157,33 @@ if scan_broida:
             (34.41230,  -119.84659), # south of broida
             (34.41638,  -119.84642), # campbell
             (34.40946,  -119.85603), # dp close to campus
-            (34.41225,  -119.85530), # freebirds
-            (34.41516,  -119.85521), # north embarcadero del norte
+            # (34.41225,  -119.85530), # freebirds
+            # (34.41516,  -119.85521), # north embarcadero del norte
         ]
 if scan_iv_1:
     coords += [
             (34.40946,  -119.85603), # dp close to campus
             (34.41225,  -119.85530), # freebirds
             (34.41024,  -119.86169),
-            (34.40985,  -119.86534),
-            (34.41257,  -119.85886),
+            # (34.40985,  -119.86534),
+            # (34.41257,  -119.85886),
     ]
 if scan_iv_2:
     coords += [
             (34.41516,  -119.85521), # north embarcadero del norte
             (34.40981,  -119.85886),
             (34.41526,  -119.86023),
-            (34.41250,  -119.86114),
-            (34.41282,  -119.86538),
+            # (34.41250,  -119.86114),
+            # (34.41282,  -119.86538),
     ]
 
 
-for lat,lng in coords:
-    try:
-        pokelocs.extend( api.main(lat=lat, lng=lng, creds=creds) )
-    except:
-        print "SERVER ERROR, so skipping this location"
 
-# STEAL MORE POKEMON FROM skiplagged.com/api/pokemon.php!!!
-slag_json = requests.get("https://skiplagged.com/api/pokemon.php?bounds=34.407904,-119.864899,34.41911,-119.828807").json()
-for poke in slag_json["pokemons"]:
-    pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), poke["pokemon_id"], poke["pokemon_name"].replace(" ",""), str(poke["latitude"]), str(poke["longitude"]), poke["expires"]-int(time.time()))
-    pokelocs.append(pokeloc)
+pokelocs.extend( fetch_pokevision(34.41420320229702,-119.85021829605101) )
+pokelocs.extend( fetch_ours(coords) )
+pokelocs.extend( fetch_skiplagged() )
+pokelocs.extend( fetch_pokevision(34.412574601595,-119.8613977432251) )
 
-# STEAL MORE POKEMON FROM pokevision.com!!!
-pvjob_json = get_json("https://pokevision.com/map/scan/34.4123533/-119.8602263")
-if pvjob_json["status"] == "success":
-    jobId = pvjob_json["jobId"]
-    time.sleep(5)
-    pv_json = get_json("https://pokevision.com/map/data/34.4123533/-119.8602263/%s" % jobId)
-    if "pokemon" in pv_json:
-        for poke in pv_json["pokemon"]:
-            pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), int(poke["pokemonId"]), pokemon_id_to_name(int(poke["pokemonId"])), str(poke["latitude"]), str(poke["longitude"]), int(poke["expiration_time"])-int(time.time()))
-            pokelocs.append(pokeloc)
-    else:
-        print "### WARNING! ### Pokevision is taking it's sweet time to scan. Even after 5 seconds, we didn't get anything. Ignoring for this round."
-else:
-    print "### WARNING! ### Pokevision is rate-limiting us right now"
 
 unseen = {}
 unseen["nick"] = {130,131,132,5,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122,134}
@@ -175,6 +195,7 @@ apply_screening = True
 screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth"}
 
 suffix = "_1" if who == "nick" else "_2"
+unique_lat_lng = set()
 with open("pokemon.js", "w") as fhout:
     fhout.write("last_updated%s = \"%s\";\n" % (suffix, datetime.datetime.now()))
     fhout.write("last_updated_ts%s = %i;\n" % (suffix, int(time.time())))
@@ -197,6 +218,10 @@ with open("pokemon.js", "w") as fhout:
         # needed for log file
         print pokeloc
         
+        # skip if this is a duplicate pokemon at same lat, lng
+        if (num,lat_goog,lng_goog) in unique_lat_lng: continue
+        unique_lat_lng.add( (num,lat_goog,lng_goog) )
+
         if apply_screening:
             skipping = False
             for blah in screening_list:
