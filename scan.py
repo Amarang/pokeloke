@@ -117,14 +117,14 @@ def fetch_pokevision(lat,lng):
     pvjob_json = get_json("https://pokevision.com/map/scan/%s/%s" % (str(lat),str(lng)))
     if pvjob_json["status"] == "success":
         jobId = pvjob_json["jobId"]
-        time.sleep(5)
+        time.sleep(7)
         pv_json = get_json("https://pokevision.com/map/data/%s/%s/%s" % (str(lat),str(lng),jobId))
         if "pokemon" in pv_json:
             for poke in pv_json["pokemon"]:
                 pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), int(poke["pokemonId"]), pokemon_id_to_name(int(poke["pokemonId"])), str(poke["latitude"]), str(poke["longitude"]), int(poke["expiration_time"])-int(time.time()))
                 new_pokelocs.append(pokeloc)
         else:
-            print "### WARNING! ### Pokevision is taking it's sweet time to scan. Even after 5 seconds, we didn't get anything. Ignoring for this round."
+            print "### WARNING! ### Pokevision is taking it's sweet time to scan. Even after 7 seconds, we didn't get anything. Ignoring for this round."
     else:
         print "### WARNING! ### Pokevision is rate-limiting us right now"
     return new_pokelocs
