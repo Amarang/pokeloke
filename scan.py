@@ -154,10 +154,14 @@ for poke in slag_json["pokemons"]:
 pvjob_json = get_json("https://pokevision.com/map/scan/34.41305256378447/-119.8490595817566")
 if pvjob_json["status"] == "success":
     jobId = pvjob_json["jobId"]
+    time.sleep(5)
     pv_json = get_json("https://pokevision.com/map/data/34.41305256378447/-119.8490595817566/%s" % jobId)
-    for poke in pv_json["pokemon"]:
-        pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), int(poke["pokemonId"]), pokemon_id_to_name(int(poke["pokemonId"])), str(poke["latitude"]), str(poke["longitude"]), int(poke["expiration_time"])-int(time.time()))
-        pokelocs.append(pokeloc)
+    if "pokemon" in pv_json:
+        for poke in pv_json["pokemon"]:
+            pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), int(poke["pokemonId"]), pokemon_id_to_name(int(poke["pokemonId"])), str(poke["latitude"]), str(poke["longitude"]), int(poke["expiration_time"])-int(time.time()))
+            pokelocs.append(pokeloc)
+    else:
+        print "### WARNING! ### Pokevision is taking it's sweet time to scan. Even after 5 seconds, we didn't get anything. Ignoring for this round."
 else:
     print "### WARNING! ### Pokevision is rate-limiting us right now"
 
