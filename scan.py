@@ -68,7 +68,7 @@ def pokemon_id_to_name(pid):
 def get_json(url):
     data = {}
     try:
-        stat, out = commands.getstatusoutput("curl -s \"%s\"" % url)
+        stat, out = commands.getstatusoutput("curl -s \"%s\" --max-time 10" % url)
         data = json.loads(out)
     except: print "ERROR fetching json from %s" % url
     return data
@@ -151,11 +151,11 @@ for poke in slag_json["pokemons"]:
     pokelocs.append(pokeloc)
 
 # STEAL MORE POKEMON FROM pokevision.com!!!
-pvjob_json = get_json("https://pokevision.com/map/scan/34.4123533,-119.8602263")
+pvjob_json = get_json("https://pokevision.com/map/scan/34.4123533/-119.8602263")
 if pvjob_json["status"] == "success":
     jobId = pvjob_json["jobId"]
     time.sleep(5)
-    pv_json = get_json("https://pokevision.com/map/data/34.4123533,-119.8602263/%s" % jobId)
+    pv_json = get_json("https://pokevision.com/map/data/34.4123533/-119.8602263/%s" % jobId)
     if "pokemon" in pv_json:
         for poke in pv_json["pokemon"]:
             pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), int(poke["pokemonId"]), pokemon_id_to_name(int(poke["pokemonId"])), str(poke["latitude"]), str(poke["longitude"]), int(poke["expiration_time"])-int(time.time()))
