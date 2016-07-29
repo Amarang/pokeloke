@@ -7,6 +7,9 @@ import math
 import traceback
 import requests
 import pickle
+import ast
+import commands
+import json
 from config import *
 
 # ### CONFIG LOOKS LIKE
@@ -52,6 +55,23 @@ def mail(s,b,to):
     with open("temp.txt", "w") as fhtemp:
         fhtemp.write(b)
     os.system("cat temp.txt | mail -s \"%s\" %s" % (s, to))
+
+poke_id_map = {}
+def pokemon_id_to_name(pid):
+    if not poke_id_map:
+        with open("api/pokemon.json","r") as fmapin:
+            data = ast.literal_eval(fmapin.read())
+            for poke in data:
+                poke_id_map[int(poke["Number"])] = poke["Name"].replace(" ","")
+    return poke_id_map.get(pid, "Unknown")
+
+def get_json(url):
+    data = {}
+    try:
+        stat, out = commands.getstatusoutput("curl -s \"%s\"" % url)
+        data = json.loads(out)
+    except: print "ERROR fetching json from %s" % url
+    return data
 
 def distance(p1, p2):
     lat1, long1 = p1
@@ -129,6 +149,17 @@ slag_json = requests.get("https://skiplagged.com/api/pokemon.php?bounds=34.40790
 for poke in slag_json["pokemons"]:
     pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), poke["pokemon_id"], poke["pokemon_name"].replace(" ",""), str(poke["latitude"]), str(poke["longitude"]), poke["expires"]-int(time.time()))
     pokelocs.append(pokeloc)
+
+# STEAL MORE POKEMON FROM pokevision.com!!!
+pvjob_json = get_json("https://pokevision.com/map/scan/34.41305256378447/-119.8490595817566")
+if pvjob_json["status"] == "success":
+    jobId = pvjob_json["jobId"]
+    pv_json = get_json("https://pokevision.com/map/data/34.41305256378447/-119.8490595817566/%s" % jobId)
+    for poke in pv_json["pokemon"]:
+        pokeloc = "%i,%i,%s,%s,%s,%i" % (int(time.time()), int(poke["pokemonId"]), pokemon_id_to_name(int(poke["pokemonId"])), str(poke["latitude"]), str(poke["longitude"]), int(poke["expiration_time"])-int(time.time()))
+        pokelocs.append(pokeloc)
+else:
+    print "### WARNING! ### Pokevision is rate-limiting us right now"
 
 unseen = {}
 unseen["nick"] = {130,131,132,5,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122,134}
