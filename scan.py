@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import api.pokelocator_api as api
 import datetime
 import time
@@ -100,6 +101,18 @@ def fetch_ours(coords):
             print "SERVER ERROR, so skipping this location"
     return new_pokelocs
 
+def fetch_local():
+    print "### FETCHING LOCAL POKEVISION ###"
+    new_pokelocs = []
+    stat,lines = commands.getstatusoutput("tail -n 450 fromlocal.txt")
+    if stat == 0:
+        for line in lines.splitlines():
+            line = line.title()
+            line = line.replace("♀","F")
+            line = line.replace("♂","M")
+            new_pokelocs.append(line)
+    return new_pokelocs
+
 def fetch_skiplagged():
     print "### FETCHING SKIPLAGGED ###"
     # STEAL MORE POKEMON FROM skiplagged.com/api/pokemon.php!!!
@@ -165,8 +178,8 @@ if scan_iv_1:
             (34.40946,  -119.85603), # dp close to campus
             (34.41225,  -119.85530), # freebirds
             (34.41024,  -119.86169),
-            # (34.40985,  -119.86534),
-            # (34.41257,  -119.85886),
+            (34.40985,  -119.86534),
+            (34.41257,  -119.85886),
     ]
 if scan_iv_2:
     coords += [
@@ -179,10 +192,11 @@ if scan_iv_2:
 
 
 
-pokelocs.extend( fetch_pokevision(34.41420320229702,-119.85021829605101) )
-pokelocs.extend( fetch_ours(coords) )
+# pokelocs.extend( fetch_pokevision(34.41420320229702,-119.85021829605101) )
+# pokelocs.extend( fetch_ours(coords) )
+pokelocs.extend( fetch_local() )
 pokelocs.extend( fetch_skiplagged() )
-pokelocs.extend( fetch_pokevision(34.412574601595,-119.8613977432251) )
+# pokelocs.extend( fetch_pokevision(34.412574601595,-119.8613977432251) )
 
 
 unseen = {}
