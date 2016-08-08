@@ -55,7 +55,8 @@ def mail(s,b,to):
     print "mailing %s to %s" % (s, to)
     with open("temp.txt", "w") as fhtemp:
         fhtemp.write(b)
-    os.system("cat temp.txt | mail -s \"%s\" %s" % (s, to))
+    # os.system("cat temp.txt | mail -s \"%s\" %s" % (s, to))
+    os.system("""mail -s "$(echo "%s\nContent-Type: text/html")"  %s  <  temp.txt""" % (s, to))
 
 poke_id_map = {}
 def pokemon_id_to_name(pid):
@@ -104,7 +105,7 @@ def fetch_ours(coords):
 def fetch_local():
     print "### FETCHING LOCAL POKEVISION ###"
     new_pokelocs = []
-    stat,lines = commands.getstatusoutput("tail -n 450 fromlocal.txt")
+    stat,lines = commands.getstatusoutput("tail -n 650 fromlocal.txt")
     if stat == 0:
         for line in lines.splitlines():
             line = line.title()
@@ -195,18 +196,18 @@ if scan_iv_2:
 # pokelocs.extend( fetch_pokevision(34.41420320229702,-119.85021829605101) )
 # pokelocs.extend( fetch_ours(coords) )
 pokelocs.extend( fetch_local() )
-pokelocs.extend( fetch_skiplagged() )
+# pokelocs.extend( fetch_skiplagged() )
 # pokelocs.extend( fetch_pokevision(34.412574601595,-119.8613977432251) )
 
 
 unseen = {}
-unseen["nick"] = {130,131,132,5,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122,134}
+unseen["nick"] = {130,131,132,5,40,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122,134}
 unseen["sicheng"] = {2,3,5,6,8,9,28,31,36,45,65,68,71,76,83,87,89,91,94,110,113,114,115,121,122,130,131,132,134,139,141,142,143,144,145,146,147,148,149,150,151}
-unseen["seth"] = {2,3,6,8,9,40,62,65,68,71,76,80,83,87,89,91,94,103,110,115,122,130,131,132,134,138,139,142,143,144,145,146,148,149,150,151}
+unseen["seth"] = {3,6,8,9,62,68,71,76,80,83,87,91,103,110,115,122,130,131,132,134,137,143,144,145,146,147,148,149,150,151}
 unseen["gabriel"] = {2,3,5,6,9,12,15,30,31,34,36,40,45,51,59,61,65,68,70,71,76,83,91,94,105,108,110,113,114,115,122,130,131,132,134,135,139,141,142,143,144,145,146,148,149,150,151}
 
 apply_screening = True
-screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth"}
+screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth", "Venonat", "Rhyhorn", "Tentacool"}
 
 suffix = "_1" if who == "nick" else "_2"
 unique_lat_lng = set()
@@ -229,18 +230,19 @@ with open("pokemon.js", "w") as fhout:
         # or if the pokemon has an unphysical lifetime
         if not (0 <= life <= 900): continue
 
-        # needed for log file
-        print pokeloc
         
         # skip if this is a duplicate pokemon at same lat, lng
         if (num,lat_goog,lng_goog) in unique_lat_lng: continue
         unique_lat_lng.add( (num,lat_goog,lng_goog) )
 
+        # needed for log file
+        print pokeloc
+
         if apply_screening:
             skipping = False
             for blah in screening_list:
                 if name == blah:
-                    print name, "is found, but not bother showing it on the map."
+                    # print name, "is found, but not bother showing it on the map."
                     skipping = True
             if skipping:
                 continue
@@ -249,15 +251,30 @@ with open("pokemon.js", "w") as fhout:
         minsleft = int(life/60)
 
         # HANDLE UNSEEN
-        b = """
-        Found a {name} with {life} mins remaining at https://www.google.com/maps/dir/{lat},{lng}/@{lat},{lng},16z
-        Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
-        """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
         s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
+        b = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head><title></title>
+</head>
+<body>
+
+
+        Found a {name} with {life} mins remaining at https://www.google.com/maps/dir//{lat},{lng}/@{lat},{lng},16z
+        <br>
+        Link to custom map: http://uaf-6.t2.ucsd.edu/~namin/dump/pgo/map.html
+        <br>
+
+<img src='https://maps.googleapis.com/maps/api/staticmap?center={lat},{lng}&zoom=14&size=500x300&markers=color:blue|label:test|{lat},{lng}&key=' />
+        
+
+</body>
+</html>
+        """.format(name=name, life=minsleft, lat=str(lat), lng=str(lng))
 
         for person in unseen.keys():
             if num not in unseen[person]: continue
-            if minsleft < 3: continue 
+            if minsleft < 2: continue 
 
             unique_tuple =  get_unique_tuple(person, num, lat, lng, ts, life)
             if have_emailed(unique_tuple): continue
