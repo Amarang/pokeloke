@@ -85,12 +85,21 @@ def distance(p1, p2):
     dy = abs(lat2-lat1)*milesPerDegLat
     return math.sqrt(dx**2 + dy**2)
 
-def where_is_nick(hour):
+def where_is_nick():
+    hour = datetime.datetime.now().hour + 1.0*datetime.datetime.now().minute/60
     if 9 < hour < 18: return 34.4140608,-119.8429348 # broida
     else: return 34.4181543,-119.8549256 # san clem
 
 def is_walkable(p1,hour,lifetime_mins):
-    return lifetime_mins - 1 >= distance(where_is_nick(hour), p1) / (3.9) * 60.0
+    return lifetime_mins - 1 >= distance(where_is_nick(), p1) / (3.9) * 60.0
+
+def is_bikeable(dest,lifetime_mins):
+    orig = where_is_nick()
+    data = requests.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins={lat1},{lng1}&destinations={lat2},{lng2}&mode=bicycling&key=AIzaSyBG-WFho0CVYtcuzWaRhNJBoT8DZ884IZI".format(lat1=orig[0],lng1=orig[1],lat2=dest[0],lng2=dest[1])).json()
+
+    dur_mins = int(math.ceil(data["rows"][0]["elements"][0]["duration"]["value"]/60.0))
+
+    return lifetime_mins - 1.5 >= dur_mins
 
 def fetch_ours(coords):
     print "### FETCHING OURS ###"
@@ -203,9 +212,10 @@ pokelocs.extend( fetch_local() )
 unseen = {}
 unseen["nick"] = {130,131,132,5,40,6,8,137,138,139,2,142,143,144,145,146,147,148,149,150,151,31,34,36,45,9,62,65,68,71,76,83,85,87,88,89,91,94,3,115,122,134}
 unseen["sicheng"] = {2,3,5,6,8,9,28,31,36,45,65,68,71,76,83,87,89,91,94,110,113,114,115,121,122,130,131,132,134,139,141,142,143,144,145,146,147,148,149,150,151}
-unseen["seth"] = {3,6,8,9,62,68,71,76,80,83,87,91,103,110,115,122,130,131,132,134,137,143,144,145,146,147,148,149,150,151}
+unseen["seth"] = {59,3,6,9,62,76,80,83,87,103,110,115,122,130,131,132,134,137,143,144,145,146,147,148,149,150,151}
 unseen["gabriel"] = {2,3,5,6,9,12,15,30,31,34,36,40,45,51,59,61,65,68,70,71,76,83,91,94,105,108,110,113,114,115,122,130,131,132,134,135,139,141,142,143,144,145,146,148,149,150,151}
 
+# don't write common pokemon to the .js file
 apply_screening = True
 screening_list = {"Pidgey", "Rattata", "Zubat", "Paras", "Spearow", "Voltorb", "Magnemite", "Caterpie", "Weedle", "Ekans", "Meowth", "Venonat", "Rhyhorn", "Tentacool"}
 
@@ -225,7 +235,7 @@ with open("pokemon.js", "w") as fhout:
         ts = int(ts)
 
         # skip entirely if the pokemon is more than 7 miles away
-        if distance(where_is_nick(hour), (float(lat),float(lng))) > 7.0: continue
+        if distance(where_is_nick(), (float(lat),float(lng))) > 7.0: continue
 
         # or if the pokemon has an unphysical lifetime
         if not (0 <= life <= 900): continue
@@ -250,8 +260,8 @@ with open("pokemon.js", "w") as fhout:
 
         minsleft = int(life/60)
 
+
         # HANDLE UNSEEN
-        s = "[PGo] {name} - {life} mins left".format(name=name, life=minsleft)
         b = """
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -279,6 +289,11 @@ with open("pokemon.js", "w") as fhout:
             unique_tuple =  get_unique_tuple(person, num, lat, lng, ts, life)
             if have_emailed(unique_tuple): continue
 
+            extra = ""
+            # this function makes a google maps API call, so we only want to do this if we are about to email
+            if is_bikeable((float(lat),float(lng)),minsleft):
+                extra += " [bikeable] "
+            s = "[PGo]{extra}{name} - {life} mins left".format(extra=extra, name=name, life=minsleft)
             mail(s=s, b=b, to=emails[person])
             add_to_email_history(unique_tuple)
 
