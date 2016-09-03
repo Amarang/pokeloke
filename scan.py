@@ -213,8 +213,6 @@ pokelocs.extend( fetch_local() )
 
 unseen = {}
 unseen["nick"] = {130,131,132,5,40,6,137,139,2,142,143,144,145,146,148,149,150,151,31,34,36,45,9,68,71,76,83,87,89,94,3,115,122,134}
-if hour < 7:
-    unseen["nick"] = {149,3,142}
 unseen["sicheng"] = {6,9,68,71,83,91,94,110,115,122,130,131,132,143,144,145,146,148,149,150,151}
 unseen["seth"] = {59,3,6,9,62,76,80,83,103,115,122,130,131,132,134,143,144,145,146,147,148,149,150,151}
 # unseen["gabriel"] = {2,3,5,6,9,12,15,30,31,34,36,40,45,51,59,61,65,68,70,71,76,83,91,94,105,108,110,113,114,115,122,130,131,132,134,135,139,141,142,143,144,145,146,148,149,150,151}
@@ -298,9 +296,13 @@ with open("pokemon.js", "w") as fhout:
             if is_bikeable((float(lat),float(lng)),minsleft):
                 extra += " [bikeable] "
             s = "[PGo]{extra}{name} - {life} mins left".format(extra=extra, name=name, life=minsleft)
+
             mail(s=s, b=b, to=emails[person])
-            if person == "nick" and hour < 7: push.send_push(name)
             add_to_email_history(unique_tuple)
+
+            # push notifications for nick
+            if person == "nick" and num in {149,3,142}:
+                push.send_push(name)
 
     fhout.write("];\n" )
 

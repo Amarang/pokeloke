@@ -10,3 +10,6 @@ def send_push(name):
     cmd = """curl --header 'Access-Token: %s' --header 'Content-Type: application/json' --data-binary '{"body":"%s","title":"%s","type":"note"}' --request POST https://api.pushbullet.com/v2/pushes"""
     cmd = cmd % (apikey, body, title)
     os.system(cmd)
+
+if __name__ == "__main__":
+    send_push("Pidgey")
